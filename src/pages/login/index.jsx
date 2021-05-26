@@ -1,13 +1,27 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import { Form, Input, Button } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { Redirect } from 'react-router-dom/cjs/react-router-dom.min';
+import { reqLogin } from '../../api/login'
+import memory from '../../utils/memory'
+import local from '../../utils/local'
 
 export default class Login extends Component {
-    render() {
-        const onFinish = (values) => {
-            console.log('value',values)
+
+    onFinish = async (values) => {
+        const { username, password } = values
+        const res = await reqLogin(username, password)
+        if (res && res.status === 0) {
+            memory.user = res.data
+            local.saveUser(res.data)
+            this.props.history.replace('/admin')
+        } else {
+            alert('登陆失败')
         }
 
+    }
+
+    showLogin = () => {
         return (
             <div className="login">
                 <header>
@@ -18,14 +32,14 @@ export default class Login extends Component {
                         name="normal_login"
                         className="login-form"
                         initialValues={{ remember: true }}
-                        onFinish = {onFinish}
+                        onFinish={this.onFinish}
                     >
                         <h2>管理员登录</h2>
                         <Form.Item
                             name="username"
                             rules={[
                                 { required: true, message: '用户名不能为空!' },
-                                { pattern: /^[0-9][a-zA-Z0-9@.]*$/, message: '必须以数字开头，且由英文、数字或@ .组成'},
+                                { pattern: /^[a-zA-Z][a-zA-Z0-9@.]*$/, message: '必须以字母开头，且由英文、数字或@ .组成' },
                             ]}
                         >
                             <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="用户名" />
@@ -33,9 +47,9 @@ export default class Login extends Component {
                         <Form.Item
                             name="password"
                             rules={[
-                                { required: true,  message: '密码不能为空!' },
-                                { min: 6, message: '密码不少于6位'},
-                                { max: 15, message: '密码不能超过15位'},
+                                { required: true, message: '密码不能为空!' },
+                                { min: 6, message: '密码不少于6位' },
+                                { max: 15, message: '密码不能超过15位' },
                             ]}
                         >
                             <Input
@@ -53,6 +67,19 @@ export default class Login extends Component {
                     </Form>
                 </section>
             </div>
+        )
+    }
+
+    render() {
+        const { user } = memory
+        if (user && user._id) {
+            return <Redirect to='/admin' />
+        }
+
+        return (
+            <Fragment>
+                {this.showLogin()}
+            </Fragment>
         )
     }
 }

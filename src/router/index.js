@@ -6,10 +6,10 @@ const Login = React.lazy(()=>import('../pages/login'))
 
 const routes = [
     {
-        path: "/",
+        path: '/',
         exact: true,
         render: () => (
-            <Redirect to="/login" />
+            <Redirect to='/login' />
         )
     },
     {
@@ -21,7 +21,5 @@ const routes = [
         component:Login
     }
 ]
-
-
 
 export default routes
